@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kota_uas_muhammadwiman {
+  kode_kota                                                                                   String                        @id @db.VarChar(20)
+  nama_kota                                                                                   String                        @db.VarChar(25)
+  bandara                                                                                     String                        @db.VarChar(25)
+  pemesanan_uas_muhammadwiman_pemesanan_uas_muhammadwiman_kota_asalTokota_uas_muhammadwiman   pemesanan_uas_muhammadwiman[] @relation("pemesanan_uas_muhammadwiman_kota_asalTokota_uas_muhammadwiman")
+  pemesanan_uas_muhammadwiman_pemesanan_uas_muhammadwiman_kota_tujuanTokota_uas_muhammadwiman pemesanan_uas_muhammadwiman[] @relation("pemesanan_uas_muhammadwiman_kota_tujuanTokota_uas_muhammadwiman")
+}
+
+model pelanggan_uas_muhammadwiman {
+  no_ktp                      String                                    @id @db.VarChar(15)
+  nama                        String                                    @db.VarChar(25)
+  alamat                      String                                    @db.Text
+  no_telp                     String                                    @db.VarChar(15)
+  jenis_kelamin               pelanggan_uas_muhammadwiman_jenis_kelamin
+  pemesanan_uas_muhammadwiman pemesanan_uas_muhammadwiman[]
+  tiket_uas_muhammadwiman     tiket_uas_muhammadwiman[]
+}
+
+model pemesanan_uas_muhammadwiman {
+  no_penerbangan                                                                         String                            @id @db.VarChar(15)
+  no_ktp                                                                                 String                            @db.VarChar(15)
+  maskapai                                                                               String                            @db.VarChar(11)
+  kelas                                                                                  pemesanan_uas_muhammadwiman_kelas
+  kota_asal                                                                              String                            @db.VarChar(20)
+  kota_tujuan                                                                            String                            @db.VarChar(20)
+  tanggal_keberangkatan                                                                  DateTime                          @db.Date
+  pukul                                                                                  DateTime                          @db.Time(0)
+  harga_tiket                                                                            Decimal                           @db.Decimal(10, 0)
+  kota_uas_muhammadwiman_pemesanan_uas_muhammadwiman_kota_asalTokota_uas_muhammadwiman   kota_uas_muhammadwiman            @relation("pemesanan_uas_muhammadwiman_kota_asalTokota_uas_muhammadwiman", fields: [kota_asal], references: [kode_kota], onUpdate: Restrict, map: "pemesanan_uas_muhammadwiman_ibfk_2")
+  kota_uas_muhammadwiman_pemesanan_uas_muhammadwiman_kota_tujuanTokota_uas_muhammadwiman kota_uas_muhammadwiman            @relation("pemesanan_uas_muhammadwiman_kota_tujuanTokota_uas_muhammadwiman", fields: [kota_tujuan], references: [kode_kota], onUpdate: Restrict, map: "pemesanan_uas_muhammadwiman_ibfk_3")
+  pesawat_uas_muhammadwiman                                                              pesawat_uas_muhammadwiman         @relation(fields: [maskapai], references: [kode_maskapai], onUpdate: Restrict, map: "pemesanan_uas_muhammadwiman_ibfk_4")
+  pelanggan_uas_muhammadwiman                                                            pelanggan_uas_muhammadwiman       @relation(fields: [no_ktp], references: [no_ktp], onUpdate: Restrict, map: "pemesanan_uas_muhammadwiman_ibfk_5")
+  transaksi_uas_muhammadwiman                                                            transaksi_uas_muhammadwiman[]
+
+  @@index([kota_asal], map: "kota_asal")
+  @@index([kota_tujuan], map: "kota_tujuan")
+  @@index([maskapai], map: "maskapai")
+  @@index([no_ktp], map: "no_ktp")
+}
+
+model pesawat_uas_muhammadwiman {
+  kode_maskapai               String                        @id @db.VarChar(11)
+  nama_maskapai               String                        @db.VarChar(25)
+  nama_pesawat                String                        @db.VarChar(25)
+  pemesanan_uas_muhammadwiman pemesanan_uas_muhammadwiman[]
+}
+
+model tiket_uas_muhammadwiman {
+  no_tiket                    String                      @id @db.VarChar(12)
+  no_ktp                      String                      @db.VarChar(15)
+  no_transaksi                String                      @db.VarChar(15)
+  transaksi_uas_muhammadwiman transaksi_uas_muhammadwiman @relation(fields: [no_transaksi], references: [id_transaksi], onUpdate: Restrict, map: "tiket_uas_muhammadwiman_ibfk_2")
+  pelanggan_uas_muhammadwiman pelanggan_uas_muhammadwiman @relation(fields: [no_ktp], references: [no_ktp], onUpdate: Restrict, map: "tiket_uas_muhammadwiman_ibfk_3")
+
+  @@index([no_ktp], map: "no_ktp")
+  @@index([no_transaksi], map: "no_transaksi")
+}
+
+model transaksi_uas_muhammadwiman {
+  id_transaksi                String                      @id @db.VarChar(15)
+  nama_nasabah                String                      @db.VarChar(25)
+  no_rekening                 String                      @db.VarChar(12)
+  no_penerbangan              String                      @db.VarChar(15)
+  tiket_uas_muhammadwiman     tiket_uas_muhammadwiman[]
+  pemesanan_uas_muhammadwiman pemesanan_uas_muhammadwiman @relation(fields: [no_penerbangan], references: [no_penerbangan], onUpdate: Restrict, map: "transaksi_uas_muhammadwiman_ibfk_1")
+
+  @@index([no_penerbangan], map: "no_penerbangan")
+}
+
+enum pemesanan_uas_muhammadwiman_kelas {
+  Ekonomi
+  Eksekutif
+  Premium
+}
+
+enum pelanggan_uas_muhammadwiman_jenis_kelamin {
+  Laki_laki @map("Laki-laki")
+  Perempuan
+}
